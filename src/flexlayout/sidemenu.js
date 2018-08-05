@@ -1,6 +1,7 @@
 
 import React from 'react';
 import Tree, { TreeNode } from 'rc-tree';
+import shortid from 'shortid';
 
 import 'rc-tree/assets/index.css';
 
@@ -10,7 +11,7 @@ const menu = [
     key: 'dashboard',
     'data-action': {
       id: 'DashboardTab'
-    }
+    },
   },
   {
     title: 'Accounts',
@@ -57,7 +58,7 @@ class SideMenu extends React.Component {
       )
     })
     return (
-      <Tree onSelect={this.onSelect}>
+      <Tree onSelect={this.onSelect} showIcon={false} >
         {items}
       </Tree>
     )

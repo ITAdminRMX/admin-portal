@@ -8,6 +8,18 @@ class JSONData {
     this.jsonServer = `http://localhost:${this.port}`;
   }
 
+  load(schemaName) {
+    return request
+      .get(`${this.jsonServer}/${schemaName}`)
+      .withCredentials()
+      .then(res => {
+        return res.body;
+      })
+      .catch(err => {
+        console.log('JSONData.load: error:', err);
+      })
+  }
+
   insert(schemaName, data) {
     
     // console.log(`JSONData.insert(${schemaName}):`, data);

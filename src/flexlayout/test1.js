@@ -131,7 +131,8 @@ class Main extends React.Component {
 						const rtProps = {
 							...config,
 							...props,
-							defaultFilterMethod: (filter, row) => String(row[filter.id]).toLowerCase().includes(filter.value.toLowerCase())
+							defaultFilterMethod: (filter, row) => String(row[filter.id]).toLowerCase().includes(filter.value.toLowerCase()),
+							className: '-striped -highlight',
 						}
 						result = <div style={{padding: '10px'}}><ReactTable { ...rtProps } /></div>;
 						break;
