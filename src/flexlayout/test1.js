@@ -8,6 +8,7 @@ import SideMenu from './sidemenu';
 import AccountSearch from './accountSearch';
 import AccountResults from './accountResults';
 import Tools from './tools';
+import Finder from '../lib/components/finder';
 
 import ReactTable from 'react-table';
 
@@ -135,6 +136,9 @@ class Main extends React.Component {
 							className: '-striped -highlight',
 						}
 						result = <div style={{padding: '10px'}}><ReactTable { ...rtProps } /></div>;
+						break;
+					case 'finder':
+						result = <Finder {...props} />;
 						break;
 					case 'tools':
 						result = <Tools {...props} />;

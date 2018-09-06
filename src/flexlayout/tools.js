@@ -5,6 +5,8 @@ import shortid from 'shortid';
 import DataGenerator from '../lib/dataGenerator';
 import JSONData from '../lib/JSONData';
 
+import DDP from '../lib/ddp';
+
 class Tools extends React.Component {
   generateUserData = () => {
     DataGenerator.generateData('user').then(data => {
@@ -27,11 +29,16 @@ class Tools extends React.Component {
     }
     this.props.addNode(newTab);
   }
+  checkDDP() {
+    DDP.test1();
+  }
   render() {
     return (
       <div style={{padding: '10px'}}>
         {/* <h4>Tools</h4> */}
         <button onClick={this.generateUserData}>Generate User Data</button>
+        <br/>
+        <button onClick={this.checkDDP}>Check DDP</button>
       </div>
     )
   }

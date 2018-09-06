@@ -31,7 +31,17 @@ const menu = [
       id: 'reports',
       name: 'Reports',
     }
-  }
+  },
+  {
+    title: 'Finder',
+    key: 'finder',
+    'data-action': {
+      enableRename: false,
+      id: 'finder',
+      name: 'Finder',
+      component: 'finder',
+    }
+  },
 ]
 
 class SideMenu extends React.Component {
