@@ -1,16 +1,19 @@
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+// import ReactDOM from 'react-dom';
 import FlexLayout from 'flexlayout-react';
 
+import ReactTable from 'react-table';
+
 import Dashboard from './dashboard';
-import SideMenu from './sidemenu';
+// import SideMenu from './sidemenu';
+import SideMenu from '../lib/components/sidemenu';
 import AccountSearch from './accountSearch';
 import AccountResults from './accountResults';
 import Tools from './tools';
 import Finder from '../lib/components/finder';
 
-import ReactTable from 'react-table';
+import menuStore from '../mobx/menuStore';
 
 const another = {
 	global: {},
@@ -32,7 +35,7 @@ const another = {
 						enableDrag: false,
 						enableRename: false,
 						component: 'dashboard',
-						id: 'DashboardTab'
+						id: 'dashboard'
 					}
 				]
 			},
@@ -144,13 +147,16 @@ class Main extends React.Component {
 						result = <Tools {...props} />;
 						break;
 					case 'sidemenu':
-						result = <SideMenu  {...props} />;
+						result = <SideMenu  {...props} menu={menuStore} />;
 						break;
 					case 'AccountSearch':
 						result = <AccountSearch  {...props}  />
 						break;
 					case 'AccountResults':
 						result = <AccountResults  {...props}  />
+						break;
+					default:
+						console.log('Could not find a factory implementation for:', component);
 						break;
 				}
         
@@ -197,15 +203,19 @@ class SimpleTable extends React.Component {
     shouldComponentUpdate() {
         return true;
     }
+		
+		static fieldHeaderMapper = (field) => {
+			return <th key={field}>{field}</th>;
+		}
+		
+		static fieldMapper = (field,i) => <td key={field}>{this.props.data[i][field]}</td>;
 
     render() {
-        var headercells = this.props.fields.map(function (field) {
-            return <th key={field}>{field}</th>;
-        });
+        var headercells = this.props.fields.map(SimpleTable.fieldHeaderMapper);
 
         var rows = [];
         for (var i = 0; i < this.props.data.length; i++) {
-            var row = this.props.fields.map(field => <td key={field}>{this.props.data[i][field]}</td>);
+            var row = this.props.fields.map(SimpleTable.fieldMapper);
             rows.push(<tr key={i}>{row}</tr>);
         }
 

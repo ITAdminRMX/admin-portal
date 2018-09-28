@@ -3,128 +3,146 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import ReactFinder from 'react-finderjs';
-import Chance from 'chance';
-const chance = new Chance();
 
-const list = [
-  // {label: 'Item 1', id:1,},
-  // {label: 'Item 2', id:2,},
-];
+import objectToTree from '../utils/objectToTree';
 
-const data = [
-  {
-    id: 1,
-    label: 'properties',
-    children: [
-      {
-        id: 10,
-        label: 'sql',
-      },
-      {
-        id: 11,
-        label: 'component',
-        children: [
-          {label: 'name', value: 'DataTable'},
-          {label: 'props', children: [{label: 'columnOrder', children: [{label:'id'}]}]},
-        ]
-      },
-      {
-        id: 11,
-        label: 'subcomponent',
-        children: [
-          {label: 'name', value: 'Posts'},
-          {label: 'props'},
-        ]
-      },
-    ],
-  }
-];
+import SQLEditor from './sqlEditor';
 
-let reactFinder = null;
+// const data = [
+//   {
+//     id: 1,
+//     label: 'Label A',
+//     children: [
+//       {
+//         id: 10,
+//         label: 'Label A1',
+//       },
+//       {
+//         id: 11,
+//         label: 'Label A2',
+//       }
+//     ],
+//   },
+//   {
+//     id: 2,
+//     label: 'Label B',
+//     children: [],
+//   },
+// ];
 
-function generateChildren(n, limit = 0) {
-  const children = [];
-  for(let i = 0; i < n; i += 1) {
-    const node = {
-      label: chance.name(),
-      id: chance.guid({ version: 4 }),
-    }
-    if (limit < 3) node.children = generateChildren(chance.integer({ min: 2, max: 8}), limit+1);
-    children.push(node);
-  }
-  return children;
-}
+const stuff = {
+  id: '123',
+  properties: 
+  { "sql": 
+`SELECT 
+  *,
+  date_part('day', age(a1.trial_expired_at, now()))::int4 
+    AS trial_expires,
+  ( 
+    SELECT count(ps.id) 
+    FROM posts ps 
+      INNER JOIN users u ON u.id = ps.sender_id 
+        AND u.role != 'demo-member' 
+    WHERE ps.account_id = a1.id AND category = 'status-post'
+  ) AS status_updates,
+  ( 
+    SELECT count(ps.id) 
+    FROM posts ps 
+      INNER JOIN users u ON u.id = ps.sender_id 
+        AND u.role != 'demo-member'
+    WHERE ps.account_id = a1.id 
+      AND category IN ('recognition-post', 'group-recognition-post', 'team-recognition-post') 
+  ) AS woos,
+  ( 
+    SELECT count(i.id) 
+    FROM invitations i 
+    WHERE i.account_id = a1.id 
+  ) AS invitations,
+  ( 
+    SELECT count(u.id) 
+    FROM users u 
+    WHERE u.current_account_id = a1.id 
+      AND u.role != 'demo-member' 
+  ) AS users,
+  ( 
+    SELECT count(r.id) 
+    FROM post_reactions r 
+      INNER JOIN posts p ON r.post_id = p.id 
+        AND p.account_id = a1.id 
+  ) AS likes,
+  ( 
+    SELECT count(c.id) 
+    FROM post_comments c 
+      INNER JOIN posts p ON c.post_id = p.id 
+        AND p.account_id = a1.id 
+  ) AS comments 
+  FROM accounts a1
+  WHERE status = 'free-trial'
+`   },
+};
 
-function setupList() {
-  const limit = chance.integer({ min: 15, max: 40});
-  for(let id = 0; id < limit; id += 1) {
-    const children = generateChildren(chance.integer({ min: 3, max: 40}));
-    list.push({
-      label: `Item ${id+1}`,
-      id,
-      children,
-    });
-  }
-}
-
-function colCreator(parent) {
-  console.log('colCreator:',parent);
-
-  const element = document.createElement('div');
-  ReactDOM.render(<pre>${JSON.stringify(parent)}</pre>, element);
-  return element;
-}
-
-function finderData(parent, cfg, callback) {
-  // console.log('finderData:', {parent, cfg});
-  if (parent) {
-    if (parent.children) { 
-      callback(parent.children);
-    } else {
-      reactFinder.createColumn(colCreator(parent));
-    }
-  } else {
-    callback(list);
-  }
+function process(data) {
+  const objectTree = objectToTree(data);
+  console.log('process:', {
+    data,
+    objectTree,
+  });
+  return objectTree;
 }
 
 class Finder extends React.Component {
   constructor(props) {
     super(props);
-    setupList();
+    this.reactFinder = null;
   }
-  
-  componentDidMount() {
-    // console.log('reactFinder:', this.reactFinder);
-    reactFinder = this.reactFinder;
-    // this.reactFinder._finder.on('leaf-selected', (n)=>{ console.log('reactFinder-leaf-selected', n)});
-    // this.reactFinder._finder.on('column-created', (n)=>{ console.log('reactFinder-column-created', n)});
-    // this.reactFinder._finder.on('item-selected', (n)=>{ console.log('reactFinder-item-selected', n)});
-    // this.reactFinder._finder.on('create-column', (n)=>{ console.log('reactFinder-create-column', n)});
-    
+
+  eventHandler = (type, item, dom) => {
+    console.log(`eventHandler[${type}]:`, {
+      item,
+      dom,
+    });
   }
-  
-  onLeafSelected = (node) => {
-    console.log('LeafSelected:', node);
-    this.reactFinder.createColumn(colCreator(node));
+
+  createSimpleColumn = (item) => {
+    const div = document.createElement('div');
+    const component = (
+        <div className="fjs-col leaf-col">
+          <div className="leaf-row">
+            <div>{item.path}</div>
+            <div>{item.id === 'sql' ? <SQLEditor sql={item.value} /> : JSON.stringify(item.value)}</div>
+          </div>
+        </div>
+    );
+
+    return ReactDOM.render(component,div);
   }
-  
-  onItemSelected = (node) => {
-    console.log('ItemSelected:', node);
+
+  leafSelected = (item, dom)  => {
+    const { reactFinder } = this;
+    console.log('leafSelected:', { item, dom, reactFinder });
+    this.reactFinder._finder.emit('create-column', this.createSimpleColumn(item));
+   // emitter.emit('create-column', createSimpleColumn(item));
   }
-  
-  onColumnCreated = (node) => {
-    console.log('ColumnCreated:', node);
-  }
-  
+
   render() {
+    const { props } = this;
+    console.log('Finder.props:', props);
+
+    const objectTree = process(stuff);
+    // for(let i = 0;i < 40; i += 1) {
+    //   data[1].children.push({
+    //     id: `2.${i+1}`,
+    //     label: `Child ${i+1<10 ? `0${i+1}` : i+1}`,
+    //   });
+    // }
     return (
-      <ReactFinder 
-        ref={(r) => this.reactFinder = r}
-        data={data /* finderData */}
-        onLeafSelected={this.onLeafSelected}
-        onItemSelected={this.onItemSelected}
-        onColumnCreated={this.onColumnCreated}
+      <ReactFinder
+        ref={r => this.reactFinder = r}
+        className = ""
+        data = {objectTree}
+        _onItemSelected={(i,d) => { this.eventHandler('ItemSelected', i, d)}}
+        onLeafSelected={this.leafSelected}
+        _onColumnCreated={(i,d) => { this.eventHandler('ColumnCreated', i, d)}}
       />
     )
   }

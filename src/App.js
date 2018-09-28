@@ -7,11 +7,12 @@ import 'flexlayout-react/style/light.css';
 
 import FirstLayout from './flexlayout/test1';
 
-import TodoStore from './mobx/todoStore';
+// import TodoStore from './mobx/todoStore';
 
 class App extends Component {
   
   render() {
+    console.log('process.env:', process.env);
     return (
       <div className="App">
         <FirstLayout />

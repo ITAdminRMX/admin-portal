@@ -1,0 +1,28 @@
+{
+  "menu": {
+    "location": "reports.users",
+    "label": "Users"
+  },
+  "form": {
+    "scema": {
+      
+    },
+    "uiSchema": {
+      
+    }
+  },
+  "query": {
+    "sql": "SELECT * FROM users",
+  },
+  "details": [
+    {
+      "component": "DataTable",
+      "columns": {
+        "order": ["id","first_name","last_name","email_address"]
+      },
+      "buttons": [
+        {"label":"Reload","action":"reload"}
+      ]
+    }
+  ]
+}

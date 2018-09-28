@@ -54,6 +54,6 @@ function setup() {
     
 }
 
-setup();
+// setup();
 
 export default todoStore;
